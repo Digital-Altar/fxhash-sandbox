@@ -1,0 +1,8 @@
+canvas, canvas img {
+	width: 100%;
+	opacity: 1;
+}
+img { 
+	width: 1000px;
+	height: 1000px;
+}

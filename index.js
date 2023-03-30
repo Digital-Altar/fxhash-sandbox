@@ -1,91 +1,108 @@
-console.log(fxhash)
-console.log(fxrand())
-
-const sp = new URLSearchParams(window.location.search);
-console.log(sp);
-
 // this is how to define parameters
 $fx.params([
   {
-    id: "number_id",
-    name: "A number",
+    id: "number_lines",
+    name: "Number of Lines",
     type: "number",
-    default: 1.2,
+    default: 8,
     options: {
-      min: -2,
-      max: 10,
-      step: 0.1,
-    },
-  },
-  {
-    id: "select_id",
-    name: "A selection",
-    type: "select",
-    default: "pear",
-    options: {
-      options: ["apple", "orange", "pear"],
+      min: 6,
+      max: 20,
+      step: 1,
     }
-  },
-  {
-    id: "color_id",
-    name: "A color",
-    type: "color",
-    default: "ff0000",
-  },
-  {
-    id: "boolean_id",
-    name: "A boolean",
-    type: "boolean",
-    default: true,
-  },
-  {
-    id: "string_id",
-    name: "A string",
-    type: "string",
-    default: "hello",
-    options: {
-      minLength: 1,
-      maxLength: 5
-    }
-  },
+  }
 ]);
 
 // this is how features can be defined
 $fx.features({
-  "A random feature": Math.floor($fx.rand() * 10),
-  "A random boolean": $fx.rand() > 0.5,
-  "A random string": ["A", "B", "C", "D"].at(Math.floor($fx.rand()*4)),
-  "Feature from params, its a number": $fx.getParam("number_id"),
+  "Number of Lines": $fx.getParam("number_lines"),
 })
 
-// log the parameters, for debugging purposes, artists won't have to do that
-console.log("Current param values:")
-// Raw deserialize param values 
-console.log($fx.getRawParams())
-// Added addtional transformation to the parameter for easier usage
-// e.g. color.hex.rgba, color.obj.rgba.r, color.arr.rgb[0] 
-console.log($fx.getParams())
+function setRandomImage(){
 
-// how to read a single raw parameter
-console.log("Single raw value:")
-console.log($fx.getRawParam("color_id"));
-// how to read a single transformed parameter
-console.log("Single transformed value:")
-console.log($fx.getParam("color_id"));
+  return new Promise(function(resolve) {
+  // Array of image URLs
+    const images = [
+      'plant1.png',
+      'plant2.png',
+      'plant3.png',
+      'plant4.png',
+    ];
 
-// update the document based on the parameters
-document.body.style.background = $fx.getParam("color_id").hex.rgba
-document.body.innerHTML = `
-<p>
-url: ${window.location.href}
-</p>
-<p>
-hash: ${$fx.hash}
-</p>
-<p>
-params: 
-</p>
-<pre>
-${JSON.stringify($fx.getRawParams(), null, 2)}
-</pre>
-`
+    // Select a random image URL from the array
+    const randomIndex = Math.floor($fx.rand() * images.length);
+    const randomImage = images[randomIndex];
+
+    // Set the src attribute of an <img> element to the random image URL
+    const img = document.getElementById('image');
+    img.src = randomImage;
+
+    // Add an event listener to the image element that runs glitch when the image has finished loading
+    img.addEventListener('load', function() {
+      glitch(img);
+      resolve();
+    });
+  });
+}
+
+function glitch(img) {
+  // Get the canvas and image elements
+  var canvas = document.getElementById('canvas');
+
+  // Set the canvas dimensions to match the image dimensions
+  canvas.width = 1000;
+  canvas.height = 1000;
+
+  // Get the canvas context
+  var ctx = canvas.getContext('2d');
+
+  // Draw the image on the canvas
+  ctx.clearRect(0, 0, 1000, 1000);
+  ctx.drawImage(img, 0, 0);
+
+  // Curated numbers
+  var curatedNum = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].at(Math.floor($fx.rand() * 12));
+  var curatedNum2 = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].at(Math.floor($fx.rand() * 12));
+  var curatedNum3 = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].at(Math.floor($fx.rand() * 12));
+
+  // Randomly swap the color channels of the image using the curated number
+  var imageData = ctx.getImageData(0, 0, 1000, 1000);
+  for (var i = 0; i < imageData.data.length; i += curatedNum) {
+    var temp = imageData.data[i];
+    imageData.data[i] = imageData.data[i + curatedNum2];
+    imageData.data[i + curatedNum3] = temp;
+  }
+  ctx.putImageData(imageData, 0, 0);
+
+  // Randomly modify pixels in a row or column
+  for (var i = 0; i < $fx.getParam("number_lines"); i++) {
+    var rand = Math.floor($fx.rand() * 2);
+    if (rand === 0) {
+      // Modify a row
+      var row = Math.floor($fx.rand() * 1000);
+      for (var j = 0; j < 1000; j++) {
+        var offset = (row * 1000 + j) * 1;
+        var r = Math.floor($fx.rand() * 255);
+        var g = Math.floor($fx.rand() * 255);
+        var b = Math.floor($fx.rand() * 255);
+        ctx.fillStyle = "rgb(" + r + ", " + g + ", " + b + ", .04)";
+        ctx.fillRect(j, row, 10, 10);
+      }
+    } else {
+      // Modify a column
+      var col = Math.floor($fx.rand() * 1000);
+      for (var j = 0; j < 1000; j++) {
+        var offset = (j * 1000 + col) * 2;
+        var r = Math.floor($fx.rand() * 255);
+        var g = Math.floor($fx.rand() * 255);
+        var b = Math.floor($fx.rand() * 255);
+        ctx.fillStyle = "rgb(" + r + ", " + g + ", " + b + ", .04)";
+        ctx.fillRect(col, j, 20, 20);
+      }
+    }
+  }
+}
+
+window.onload = function() {
+  setRandomImage()
+};
