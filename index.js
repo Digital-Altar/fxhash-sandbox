@@ -6,8 +6,8 @@ $fx.params([
     type: "select",
     default: "random",
     options: {
-      options: ["colorful","monocolor","random"]
-    }
+      options: ["colorful","monocolor","random"],
+    },
   },
  {
     id: "lines",
@@ -16,14 +16,15 @@ $fx.params([
     default: "random",
     options: {
       options: ["dark", "light", "random"],
-    }
-  }
+    },
+  },
 ]);
 
 // this is how features can be defined
 $fx.features({
   "Squares Style": $fx.getParam("squares"),
-})
+  "Lines Style": $fx.getParam("lines")
+});
 
 // ----------------------------------
 // this is a Digital Altar creation
@@ -91,8 +92,11 @@ Promise.all(promises).then(() => {
     topImg.src = topImgUrl;
       topImg.onload = function() {
 
-      ctx.filter = `hue-rotate(${topHueRotate}deg) opacity(60%) brightness(100%) contrast(150%)`;
-      ctx.drawImage(topImg, 0, 0);
+      ctx.save(); // save the current context state
+      ctx.globalAlpha = 0.6; // set the opacity to 60%
+      ctx.filter = `hue-rotate(${topHueRotate}deg) brightness(100%) contrast(150%)`; // set other filters
+      ctx.drawImage(topImg, 0, 0); // draw the top image
+      ctx.restore(); // restore the context state to its previous state
 
       // draw lines
       drawLines();
